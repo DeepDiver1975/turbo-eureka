@@ -1,0 +1,10 @@
+{
+  "server": "http://172.17.0.1:8088",
+	"openIdConnect": {
+	  "authority": "https://deepdiver/",
+	  "client_id": "cli",
+	  "response_type": "id_token token",
+    "scope": "openid profile email",
+    "automaticSilentRenew": true
+	}
+ }
