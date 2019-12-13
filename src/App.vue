@@ -1,8 +1,9 @@
 <template>
   <div>
-    <oc-spinner :v-if="loadingConfig" />
-    <router-view></router-view>
-   </div>
+    <div id="Phoenix" class="uk-height-1-1">
+      <router-view id="oc-app-container" class="uk-height-1-1"></router-view>
+    </div>
+  </div>
 </template>
 
 <script>
@@ -11,15 +12,10 @@ export default {
   name: 'app',
   data() {
     return {
-      loadingConfig: true
+      config: {},
+      mgr: null,
+      user: null
     }
-  },
-  mounted () {
-    fetch('config.json').then(config => {
-      this.loadingConfig = false
-      // eslint-disable-next-line no-console
-      console.log(config);
-    })
   }
 }
 </script>

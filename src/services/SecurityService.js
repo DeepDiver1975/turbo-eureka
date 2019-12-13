@@ -1,67 +1,69 @@
 /* eslint-disable */
 import Oidc from 'oidc-client';
 
-// TODO: read from config
-var mgr = new Oidc.UserManager({
-  userStore: new Oidc.WebStorageStateStore(),  
-  authority: 'https://kopano.demo',
-  client_id: 'graph-files',
-  redirect_uri: 'https://kopano.demo/graph-files/callback.html',
-  response_type: 'id_token token',
-  scope: 'openid profile offline_access',
-  post_logout_redirect_uri: 'https://kopano.demo/graph-files/index.html',
-  silent_redirect_uri: 'https://kopano.demo/graph-files/silent-renew.html',
-  accessTokenExpiringNotificationTime: 10,
-  automaticSilentRenew: true,
-  filterProtocolClaims: true,
-  loadUserInfo: true
-})
-
-Oidc.Log.logger = console;
-Oidc.Log.level = Oidc.Log.INFO;
-
-mgr.events.addUserLoaded(function (user) {  
-  console.log('New User Loaded：', arguments);
-  console.log('Acess_token: ', user.access_token)
-});
-
-mgr.events.addAccessTokenExpiring(function () {
-  console.log('AccessToken Expiring：', arguments);
-});
-
-mgr.events.addAccessTokenExpired(function () {
-  console.log('AccessToken Expired：', arguments);  
-  alert('Session expired. Going out!');
-  mgr.signoutRedirect().then(function (resp) {
-    console.log('signed out', resp);
-  }).catch(function (err) {
-    console.log(err)
-  })
-});
-
-mgr.events.addSilentRenewError(function () {
-  console.error('Silent Renew Error：', arguments);
-});
-
-mgr.events.addUserSignedOut(function () {
-  alert('Going out!');
-  console.log('UserSignedOut：', arguments);  
-  mgr.signoutRedirect().then(function (resp) {
-    console.log('signed out', resp);
-  }).catch(function (err) {
-    console.log(err)
-  })
-});
-
 export default class SecurityService {
+  constructor(config) {
+    this.mgr = new Oidc.UserManager({
+      userStore: new Oidc.WebStorageStateStore(),  
+      authority: config.authority,
+      client_id: config.client_id,
+      client_secret: config.client_secret,
+      redirect_uri: config.redirect_uri,
+      response_type: 'code',
+      scope: 'openid profile email offline_access',
+      post_logout_redirect_uri: config.post_logout_redirect_uri,
+      silent_redirect_uri: config.silent_redirect_uri,
+      accessTokenExpiringNotificationTime: 10,
+      automaticSilentRenew: true,
+      filterProtocolClaims: true,
+      loadUserInfo: true,
+      monitorSession: false
+    })
+    
+    Oidc.Log.logger = console;
+    Oidc.Log.level = Oidc.Log.INFO;
+    
+    this.mgr.events.addUserLoaded(function (user) {  
+      console.log('New User Loaded：', arguments);
+      console.log('Acess_token: ', user.access_token)
+    });
+    
+    this.mgr.events.addAccessTokenExpiring(function () {
+      console.log('AccessToken Expiring：', arguments);
+    });
+    
+    this.mgr.events.addAccessTokenExpired(function () {
+      console.log('AccessToken Expired：', arguments);  
+      alert('Session expired. Going out!');
+      this.mgr.signoutRedirect().then(function (resp) {
+        console.log('signed out', resp);
+      }).catch(function (err) {
+        console.log(err)
+      })
+    });
+    
+    this.mgr.events.addSilentRenewError(function () {
+      console.error('Silent Renew Error：', arguments);
+    });
+    
+    this.mgr.events.addUserSignedOut(function () {
+      alert('Going out!');
+      console.log('UserSignedOut：', arguments);  
+      this.mgr.signoutRedirect().then(function (resp) {
+        console.log('signed out', resp);
+      }).catch(function (err) {
+        console.log(err)
+      })
+    });
+  }
 
   // Renew the token manually
   renewToken () {
     let self = this
     return new Promise((resolve, reject) => {
-      mgr.signinSilent().then(function (user) {
+      this.mgr.signinSilent().then(function (user) {
         if (user == null) {
-          self.signIn(null)
+          return self.signIn(null)
         } else{
           return resolve(user)
         }
@@ -76,10 +78,9 @@ export default class SecurityService {
   getUser () {
     let self = this
     return new Promise((resolve, reject) => {
-      mgr.getUser().then(function (user) {
+      this.mgr.getUser().then(function (user) {
         if (user == null) {
-          self.signIn()
-          return resolve(null)
+          return self.signIn()
         } else{          
           return resolve(user)
         }
@@ -94,10 +95,9 @@ export default class SecurityService {
   getSignedIn () {
     let self = this
     return new Promise((resolve, reject) => {
-      mgr.getUser().then(function (user) {
+      this.mgr.getUser().then(function (user) {
         if (user == null) {
-          self.signIn()
-          return resolve(false)
+          return self.signIn()
         } else{
           return resolve(true)
         }
@@ -110,125 +110,25 @@ export default class SecurityService {
 
   // Redirect of the current window to the authorization endpoint.
   signIn () {
-    mgr.signinRedirect().catch(function (err) {
+    return this.mgr.signinRedirect().catch(function (err) {
       console.log(err)
     })
   }
   
   // Redirect of the current window to the end session endpoint
   signOut () {    
-    mgr.signoutRedirect().then(function (resp) {
+    return this.mgr.signoutRedirect().then(function (resp) {
       console.log('signed out', resp);
     }).catch(function (err) {
       console.log(err)
     })
   }
 
-  // Get the profile of the user logged in
-  getProfile () {
-    let self = this
-    return new Promise((resolve, reject) => {
-      mgr.getUser().then(function (user) {
-        if (user == null) {
-          self.signIn()
-          return resolve(null)
-        } else{          
-          return resolve(user.profile)
-        }
-      }).catch(function (err) {
-        console.log(err)
-        return reject(err)
-      });
-    })
+  signinRedirectCallback () {
+    return this.mgr.signinRedirectCallback()
   }
 
-  // Get the token id
-  getIdToken(){
-    let self = this
-    return new Promise((resolve, reject) => {
-      mgr.getUser().then(function (user) {
-        if (user == null) {
-          self.signIn()
-          return resolve(null)
-        } else{          
-          return resolve(user.id_token)
-        }
-      }).catch(function (err) {
-        console.log(err)
-        return reject(err)
-      });
-    })
-  }
-
-  // Get the session state
-  getSessionState(){
-    let self = this
-    return new Promise((resolve, reject) => {
-      mgr.getUser().then(function (user) {
-        if (user == null) {
-          self.signIn()
-          return resolve(null)
-        } else{          
-          return resolve(user.session_state)
-        }
-      }).catch(function (err) {
-        console.log(err)
-        return reject(err)
-      });
-    })
-  }
-
-  // Get the access token of the logged in user
-  getAcessToken(){
-    let self = this
-    return new Promise((resolve, reject) => {
-      mgr.getUser().then(function (user) {
-        if (user == null) {
-          self.signIn()
-          return resolve(null)
-        } else{          
-          return resolve(user.access_token)
-        }
-      }).catch(function (err) {
-        console.log(err)
-        return reject(err)
-      });
-    })
-  }
-
-  // Takes the scopes of the logged in user
-  getScopes(){
-    let self = this
-    return new Promise((resolve, reject) => {
-      mgr.getUser().then(function (user) {
-        if (user == null) {
-          self.signIn()
-          return resolve(null)
-        } else{          
-          return resolve(user.scopes)
-        }
-      }).catch(function (err) {
-        console.log(err)
-        return reject(err)
-      });
-    })
-  }
-
-  // Get the user roles logged in
-  getRole () {
-    let self = this
-    return new Promise((resolve, reject) => {
-      mgr.getUser().then(function (user) {
-        if (user == null) {
-          self.signIn()
-          return resolve(null)
-        } else{          
-          return resolve(user.profile.role)
-        }
-      }).catch(function (err) {
-        console.log(err)
-        return reject(err)
-      });
-    })
+  signinSilentCallback () {
+    return this.mgr.signinSilentCallback()
   }
 }
