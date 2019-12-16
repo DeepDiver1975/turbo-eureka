@@ -40,14 +40,18 @@ const router = new VueRouter({
 })
 
 router.getManager = function () {
+  // HACK
   if (window.user_manager === undefined) {
     return fetch('config.json').then(config => {
       return config.json().then(json => {
+        // HACK
+        window.config = json
         const baseUrl = window.location.href
         json.openIdConnect.redirect_uri = baseUrl + 'oidc-callback'
         json.openIdConnect.post_logout_redirect_uri = baseUrl
         json.openIdConnect.silent_redirect_uri = baseUrl + 'oidc-silent-redirect'
 
+        // HACK
         window.user_manager = new Mgr(json.openIdConnect);
         return window.user_manager
       })
