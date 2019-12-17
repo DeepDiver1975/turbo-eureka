@@ -11,7 +11,9 @@
     "core-js": "^3.4.3",
     "oidc-client": "^1.9.1",
     "owncloud-design-system": "^1.0.0-1053",
+    "owncloud-sdk": "^1.0.0-461",
     "vue": "^2.6.10",
+    "vue-avatar": "^2.1.8",
     "vue-gettext": "^2.1.6",
     "vue-router": "^3.1.3"
   },

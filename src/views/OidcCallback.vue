@@ -30,14 +30,12 @@
 </template>
 
 <script>
-import Mgr from '../services/SecurityService';
-
 export default {
   name: 'OidcCallbackPage',
   props: {
     slogan: String
   },
-  mounted () {
+  mounted() {
     this.$nextTick(() => {
       if (this.$route.query.error) {
         this.error = true
@@ -45,13 +43,23 @@ export default {
         console.warn('OAuth error: ' + this.$route.query.error + ' - ' + this.$route.query.error_description)
         return
       }
-      const mgr = new Mgr();
-
-      if (this.$route.path === '/oidc-silent-redirect') {
-        mgr.signinSilentCallback()
-      } else {
-        mgr.callback()
-      }
+      this.$router.getManager().then(mgr => {
+        if (this.$route.path === '/oidc-silent-redirect') {
+          mgr.signinSilentCallback().then(user => {
+            // TODO: store user
+            // eslint-disable-next-line no-console
+            console.log(user)
+            this.$router.push('/')
+          })
+        } else {
+          mgr.signinRedirectCallback().then(user => {
+            // TODO: store user
+            // eslint-disable-next-line no-console
+            console.log(user)
+            this.$router.push('/')
+          })
+        }
+      })
     })
   },
   data () {
