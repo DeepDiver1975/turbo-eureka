@@ -1,6 +1,6 @@
 <template>
 <div>
-  <h1>drawio home - no file loaded - go away</h1>
+  <h1>ocis-web-baseline - no file loaded - go away</h1>
   <div>{{this.error}}</div>
 </div>
 </template>

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div id="Phoenix" class="uk-height-1-1">
+    <div id="ocis-web-baseline" class="uk-height-1-1">
         <oc-navbar id="oc-topbar" tag="header" class="oc-topbar">
           <oc-navbar-item position="left">
             <oc-button icon="menu" variation="primary" class="oc-topbar-menu-burger uk-height-1-1" aria-label="Menu" ref="menubutton">

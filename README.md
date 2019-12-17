@@ -1,4 +1,4 @@
-# phoenix-drawio
+# ocis-web-baseline
 
 ## Project setup
 ```
