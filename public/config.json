@@ -1,7 +1,7 @@
 {
-  "server": "http://172.17.0.1:8088",
+	"server": "http://172.17.0.1:8088",
 	"openIdConnect": {
-	  "authority": "https://deepdiver/",
-	  "client_id": "ocis"
+		"authority": "https://deepdiver/",
+		"client_id": "ocis"
 	}
  }
